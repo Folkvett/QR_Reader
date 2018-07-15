@@ -8,6 +8,8 @@ using namespace std;
 //If this is a utility class with "atomic" function, static would be the prefered 
 // method
 
+//Test message to check how to create commits in git.
+
 struct Pixel {
 	int Red;
 	int Green;
