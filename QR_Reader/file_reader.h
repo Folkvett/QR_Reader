@@ -1,5 +1,9 @@
+#ifndef file_reader_h
+#define file_reader_h
+
 #pragma once
 #include <stdio.h>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -21,6 +25,9 @@ struct BitmapImage {
 	BitmapImage();
 	BitmapImage(const BitmapImage& other);
 	BitmapImage& operator=(const BitmapImage& other);
+	~BitmapImage();
+	BitmapImage(BitmapImage&& other);
+
 	int HeaderSize;
 	int Height;
 	int Width;
@@ -41,3 +48,5 @@ struct BitmapImage {
 namespace File_Reader {
 	BitmapImage Get_QR_Array(string filename);
 }
+
+#endif // !file_reader_h

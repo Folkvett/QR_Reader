@@ -32,12 +32,49 @@ BitmapImage& BitmapImage::operator=(const BitmapImage& other) {
 	return *this;
 }
 
+BitmapImage::~BitmapImage()
+{
+	for (int i = 0; i < Height; ++i) {
+		delete[] ImageData[i];
+		delete[] MonochromeImageData[i];
+	}
+	delete[] ImageData;
+	delete[] MonochromeImageData;
+}
+
+BitmapImage::BitmapImage(BitmapImage && other) : 
+	HeaderSize(other.HeaderSize),
+ Height(other.Height),
+ Width(other.Width),
+	NumberOfColorplanes(other.NumberOfColorplanes),
+	BitsPerPixel(other.BitsPerPixel),
+	Compression(other.Compression),
+	ImageSize(other.ImageSize),
+	HorizontalResolution(other.HorizontalResolution),
+	VerticalResolution(other.VerticalResolution),
+	NumberOfColorsInColorPalette(other.NumberOfColorsInColorPalette),
+	NumberOfImportantColorsInColorPalette(other.NumberOfImportantColorsInColorPalette)
+{
+	for (int i = 0; i < Height; ++i) {
+		ImageData[i] = other.ImageData[i];
+		MonochromeImageData[i] = other.MonochromeImageData[i];
+
+		other.ImageData[i] = nullptr;
+		other.MonochromeImageData[i] = nullptr;
+	}
+	ImageData = other.ImageData;
+	MonochromeImageData = other.MonochromeImageData;
+
+	other.ImageData = nullptr;
+	other.MonochromeImageData = nullptr;
+}
+
 namespace File_Reader {
 
 	BitmapImage Get_QR_Array(string filename) {
 		//Actually not quite trivial, must know how data is stored and read bytes (?) 
 		//Open file
-		ifstream dataFile(filename, ios::binary);
+		ifstream dataFile(filename.c_str(), ios::binary);
 		BitmapImage bitmapImage;
 
 		if (dataFile.is_open()) {
@@ -224,21 +261,25 @@ namespace File_Reader {
 							}
 							cout << std::endl;
 						}
+
 					}
 					else if (bitmapImage.BitsPerPixel == 8) {
 
+					}
+					// bitmaps are stored with the leftmost lower corner first, as opposed to upper corner where the QR reader will begin
+					// to "scan" the image. flip the picture height-wise to prepare the image for the scanner.
+					for (int i = bitmapImage.Height - 1; i > (bitmapImage.Height / 2); --i) {
+						std::swap(bitmapImage.ImageData[i], bitmapImage.ImageData[bitmapImage.Height - i - 1]);
+						std::swap(bitmapImage.MonochromeImageData[i], bitmapImage.MonochromeImageData[bitmapImage.Height - i - 1]);
 					}
 				}
 			}
 
 		}
 
-		//Note that BMP pixeldata starts at the lower left hand side of the image.
-
 		//Read file contents OR
 		//Convert into suitable data?
 
-		//Populate vector
 
 		dataFile.close();
 		//return result
